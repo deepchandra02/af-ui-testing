@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You</title>
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.7/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+
+  <div class="max-w-md mx-auto my-10 p-8 bg-white rounded-lg shadow-md text-center">
+    <h1 class="text-2xl font-bold mb-6">Thank You!</h1>
+    <p class="mb-4">Dear {{ firstName }} {{ lastName }},</p>
+    <p class="mb-4">We have received your contact information:</p>
+    <p>Email: {{ email }}</p>
+    <p>Phone: {{ phone }}</p>
+    <p><strong>Date of Birth:</strong> {{ dob }}</p>
+    <p><strong>Gender:</strong> {{ gender }}</p>
+    <p><strong>Hobbies:</strong> {{ hobbies | join(', ') }}</p>
+    <p><strong>Comments:</strong> {{ comments }}</p>
+    <p class="mt-6">We will get in touch with you soon.</p>
+  </div>
+
+</body>
+
+</html>

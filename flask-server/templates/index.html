@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forms Kiosk Search Assistant</title>
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+
+<body class="bg-gray-100 p-4">
+  <h1 class="my-6 text-center text-2xl font-bold">Forms Kiosk Search Assistant</h1>
+  <div class="max-w-md mx-auto my-10 p-8 bg-white rounded-lg shadow-md text-center">
+    <h1 class="text-2xl font-bold mb-6">Welcome to the Multi-Page Form Example</h1>
+    <a href="{{ url_for('test_form') }}"
+      class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none">
+      Go to Form
+    </a>
+  </div>
+  <div class="grid h-screen grid-cols-2">
+    <div class="px-4">
+      <div class="mb-4 flex cursor-pointer justify-center space-x-4">
+        <button id="start-recording" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">
+          <i class="fa-solid fa-microphone"></i>
+          Start Recording
+        </button>
+        <button id="stop-recording" class="rounded bg-red-300 px-4 py-2 text-white hover:bg-red-700" disabled>
+          <i class="fa-solid fa-microphone-slash"></i>
+          Stop Recording
+        </button>
+      </div>
+
+      <div id="status" class="mb-4">
+        <h2 class="text-xl font-semibold">Status:</h2>
+        <p id="status-text" class="text-gray-700">Idle</p>
+      </div>
+      <div class="mb-4">
+        <h2 class="text-xl font-semibold">Query to URL Constructor</h2>
+        <input type="text" id="query-input" class="mb-2 w-full rounded border border-gray-300 p-2"
+          placeholder="Enter your query here" />
+        <button id="construct-url" class="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-700">Construct
+          URL</button>
+      </div>
+      <div id="url-result" class="mb-4">
+        <h2 class="text-xl font-semibold">Constructed URL:</h2>
+        <p id="constructed-url-text" class="text-gray-700"></p>
+      </div>
+    </div>
+    <div class="px-4">
+      <audio id="audio-playback" controls class="mb-4 w-96"></audio>
+      <div id="timer" class="mb-4">
+        <h2 class="text-xl font-semibold">Recording Timer:</h2>
+        <p id="timer-text" class="text-gray-700">00:00</p>
+      </div>
+      <div id="audio-length" class="mb-4">
+        <h2 class="text-xl font-semibold">Input Audio Length:</h2>
+        <p id="audio-length-text" class="text-gray-700"></p>
+      </div>
+      <div id="result" class="mb-4">
+        <h2 class="text-xl font-semibold">Transcription:</h2>
+        <p id="transcription-text" class="text-gray-700"></p>
+      </div>
+    </div>
+  </div>
+  <!-- Include the custom CSS here -->
+  <style>
+    button:disabled {
+      pointer-events: none;
+    }
+
+    button:disabled:hover {
+      background-color: inherit;
+      cursor: not-allowed;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let startTime;
+    let timerInterval;
+
+    const statusText = document.getElementById('status-text');
+
+    function appendStatusText(newStatus) {
+      typeWriterEffect(statusText, newStatus, true);
+    }
+
+    function startTimer() {
+      startTime = new Date();
+      timerInterval = setInterval(() => {
+        const elapsedTime = new Date(new Date() - startTime);
+        const minutes = String(elapsedTime.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(elapsedTime.getUTCSeconds()).padStart(2, '0');
+        document.getElementById('timer-text').innerText = `${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      const elapsedTime = new Date(new Date() - startTime);
+      const seconds = Math.floor(elapsedTime / 1000);
+      const audioLengthTextElement = document.getElementById('audio-length-text');
+      audioLengthTextElement.style.color = 'red';  // Make the text red
+      typeWriterEffect(audioLengthTextElement, `Input Audio was ${seconds} seconds`);
+    }
+
+    document.getElementById('start-recording').addEventListener('click', async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+
+      appendStatusText("Recording...");
+      startTimer();
+
+      mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        appendStatusText("Processing audio...");
+        stopTimer();
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        audioChunks = [];
+        const audioUrl = URL.createObjectURL(audioBlob);
+        document.getElementById('audio-playback').src = audioUrl;
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.wav');
+
+        fetch('/transcribe', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Transcription failed');
+            }
+          })
+          .then(data => {
+            if (data.error) {
+              appendStatusText("Error during transcription");
+              typeWriterEffect(document.getElementById('transcription-text'), data.error);
+            } else {
+              appendStatusText("Transcription completed");
+              typeWriterEffect(document.getElementById('transcription-text'), data.transcription);
+              constructUrl(data.transcription);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            appendStatusText("Error during transcription");
+            typeWriterEffect(document.getElementById('transcription-text'), 'Error during transcription');
+          });
+      };
+
+      document.getElementById('stop-recording').disabled = false;
+      document.getElementById('start-recording').disabled = true;
+    });
+
+    document.getElementById('stop-recording').addEventListener('click', () => {
+      mediaRecorder.stop();
+      appendStatusText("Recording stopped, processing audio...");
+      document.getElementById('stop-recording').disabled = true;
+      document.getElementById('start-recording').disabled = false;
+    });
+
+    document.getElementById('construct-url').addEventListener('click', () => {
+      const query = document.getElementById('query-input').value;
+      constructUrl(query);
+    });
+
+    function constructUrl(query) {
+      appendStatusText("Constructing URL...");
+      fetch('/construct_url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: query })
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('URL construction failed');
+          }
+        })
+        .then(data => {
+          const constructedUrlTextElement = document.getElementById('constructed-url-text');
+          const constructedUrl = data.constructed_url;
+
+          // Clear the element before starting the typewriter effect
+          constructedUrlTextElement.innerText = '';
+
+          typeWriterEffect(constructedUrlTextElement, constructedUrl);
+          appendStatusText("URL construction completed");
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          typeWriterEffect(document.getElementById('constructed-url-text'), 'Error constructing URL');
+          appendStatusText("Error during URL construction");
+        });
+    }
+
+    // Queue system to ensure only one typewriter effect at a time per element
+    const typewriterQueues = new Map();
+
+    function typeWriterEffect(element, text, append = false) {
+      if (!typewriterQueues.has(element)) {
+        typewriterQueues.set(element, []);
+      }
+
+      const queue = typewriterQueues.get(element);
+      queue.push({ text, append });
+
+      if (queue.length === 1) {
+        processQueue(element, queue);
+      }
+    }
+
+    function processQueue(element, queue) {
+      if (queue.length === 0) return;
+
+      const { text, append } = queue[0];
+      let i = 0;
+      const speed = 30;
+
+      function typeWriter() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(typeWriter, speed);
+        } else {
+          queue.shift();
+          if (queue.length > 0) {
+            processQueue(element, queue);
+          }
+        }
+      }
+
+      if (append) {
+        element.innerHTML += '<br>';  // Add a new line before starting the next message
+      } else {
+        element.innerHTML = '';  // Clear the element before starting the typewriter effect
+      }
+
+      typeWriter();
+    }
+
+    // Listening for server updates
+    socket.on('transcription_update', (data) => {
+      appendStatusText(data.message);
+    });
+
+    socket.on('url_construction_update', (data) => {
+      appendStatusText(data.message);
+    });
+  </script>
+</body>
+
+</html>
