@@ -1,0 +1,113 @@
+{
+  "components": [
+    {
+      "name": "Username Field",
+      "type": "text_input",
+      "identifier": {
+        "method": "id",
+        "value": "input-text"
+      },
+      "html_snippet": "<input type='text' id='input-text' placeholder='Enter your username' />",
+      "actions": [
+        {
+          "name": "enter_text",
+          "parameters": {
+            "value": "Sample text"
+          }
+        },
+        {
+          "name": "validate_text",
+          "parameters": {
+            "expected_value": "Sample text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Type Dropdown",
+      "type": "dropdown",
+      "identifier": {
+        "method": "name",
+        "value": "dropdown-menu"
+      },
+      "html_snippet": "<select name='dropdown-menu'><option>Option 1</option><option>Option 2</option></select>",
+      "actions": [
+        {
+          "name": "select_option",
+          "parameters": {
+            "option_text": "Option 1"
+          }
+        },
+        {
+          "name": "validate_selection",
+          "parameters": {
+            "expected_option": "Option 1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Terms and Conditions Checkbox",
+      "type": "checkbox",
+      "identifier": {
+        "method": "css_selector",
+        "value": ".checkbox-class"
+      },
+      "html_snippet": "<input type='checkbox' class='checkbox-class' />",
+      "actions": [
+        {
+          "name": "click",
+          "parameters": {}
+        },
+        {
+          "name": "validate_checked",
+          "parameters": {
+            "expected_state": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Method Radio Button",
+      "type": "radio_button",
+      "identifier": {
+        "method": "xpath",
+        "value": "//input[@type='radio' and @value='radio1']"
+      },
+      "html_snippet": "<input type='radio' name='payment' value='radio1' />",
+      "actions": [
+        {
+          "name": "click",
+          "parameters": {}
+        },
+        {
+          "name": "validate_selected",
+          "parameters": {
+            "expected_value": "radio1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submit Button",
+      "type": "button",
+      "identifier": {
+        "method": "id",
+        "value": "submit-button"
+      },
+      "html_snippet": "<button id='submit-button'>Submit</button>",
+      "actions": [
+        {
+          "name": "click",
+          "parameters": {}
+        },
+        {
+          "name": "validate_navigation",
+          "parameters": {
+            "expected_url": "/success"
+          }
+        }
+      ]
+    }
+  ]
+}
