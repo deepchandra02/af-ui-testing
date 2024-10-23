@@ -20,10 +20,21 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 url = "https://example.com"  # Replace with the URL you want to open
 driver.get(url)
 
-# Wait for user to log in manually
-print("Please log in manually...")
-WebDriverWait(driver, 300).until(EC.url_changes(url))
-print("Logged in successfully!")
+# Wait until the URL is the one specified and the page is fully loaded
+try:
+  WebDriverWait(driver, 300).until(
+      # Waits until the browser URL matches the one specified
+      EC.url_to_be(url)
+  )
+  WebDriverWait(driver, 10).until(
+      EC.presence_of_all_elements_located(
+        (By.TAG_NAME, "input"))  # Ensures inputs are loaded
+  )
+  print("Page loaded successfully!")
+except Exception as e:
+  print(f"Error: {e}")
+  driver.quit()
+  exit()
 
 # Get all input elements on the page
 input_elements = driver.find_elements(By.TAG_NAME, "input")
