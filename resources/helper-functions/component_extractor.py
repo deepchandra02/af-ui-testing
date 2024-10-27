@@ -42,20 +42,24 @@ input_elements = driver.find_elements(By.TAG_NAME, "input")
 # Prepare a list to store input details
 input_details = []
 
-# Extract and store information for each input element
+# Extract and store information for each visible input element (excluding type="hidden")
 for input_element in input_elements:
-  input_info = {
-      "input_snippet": input_element.get_attribute('outerHTML'),
-      "type": input_element.get_attribute("type"),
-      "aria_attributes": {}
-  }
+  input_type = input_element.get_attribute("type")
 
-  # Collect all aria-* attributes
-  for attribute in input_element.get_property('attributes'):
-    if attribute['name'].startswith("aria-"):
-      input_info["aria_attributes"][attribute['name']] = attribute['value']
+  # Filter out inputs with type="hidden" and ensure the input is displayed on the page
+  if input_type != "hidden" and input_element.is_displayed():
+    input_info = {
+        "input_snippet": input_element.get_attribute('outerHTML'),
+        "type": input_type,
+        "aria_attributes": {}
+    }
 
-  input_details.append(input_info)
+    # Collect all aria-* attributes
+    for attribute in input_element.get_property('attributes'):
+      if attribute['name'].startswith("aria-"):
+        input_info["aria_attributes"][attribute['name']] = attribute['value']
+
+    input_details.append(input_info)
 
 # Save the details to a JSON file
 with open("input_details.json", "w") as file:

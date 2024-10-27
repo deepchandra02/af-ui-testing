@@ -1,111 +1,67 @@
 {
   "components": [
     {
-      "name": "Username Field",
+      "name": "Textbox",
       "type": "text_input",
-      "identifier": {
-        "method": "id",
-        "value": "input-text"
-      },
-      "html_snippet": "<input type='text' id='input-text' placeholder='Enter your username' />",
-      "actions": [
-        {
-          "name": "enter_text",
-          "parameters": {
-            "value": "Sample text"
-          }
+      "html_snippet": "<input type='text' id='username-input' placeholder='XXXX' aria-label='Numeric Box' />",
+      "variations": {
+        "character_limit": {
+          "exists": true,
+          "triggered_by": "placeholder contains only X's",
+          "limit_value": "{{char_limit}}",
+          "description": "Enforces a maximum character length based on the number of X's in placeholder."
         },
-        {
-          "name": "validate_text",
-          "parameters": {
-            "expected_value": "Sample text"
-          }
+        "numeric_only": {
+          "exists": true,
+          "triggered_by": "aria-label='Numeric Box'",
+          "description": "Restricts input to numeric values only."
         }
-      ]
-    },
-    {
-      "name": "User Type Dropdown",
-      "type": "dropdown",
-      "identifier": {
-        "method": "name",
-        "value": "dropdown-menu"
       },
-      "html_snippet": "<select name='dropdown-menu'><option>Option 1</option><option>Option 2</option></select>",
-      "actions": [
+      "testing_scenarios": [
         {
-          "name": "select_option",
-          "parameters": {
-            "option_text": "Option 1"
-          }
+          "scenario": "Character limit enforced",
+          "preconditions": [
+            "variations.character_limit.exists == true",
+            "placeholder matches 'X+'"
+          ],
+          "steps": [
+            {
+              "action": "enter_text",
+              "parameters": { "value": "X" * ({{char_limit}} + 1) },
+              "expected_result": "input is truncated or ignored beyond character limit"
+            },
+            {
+              "action": "enter_text",
+              "parameters": { "value": "X" * ({{char_limit}} - 1) },
+              "expected_result": "input accepted but may trigger 'input too short' validation"
+            },
+            {
+              "action": "enter_text",
+              "parameters": { "value": "X" * {{char_limit}} },
+              "expected_result": "input accepted without error"
+            }
+          ]
         },
         {
-          "name": "validate_selection",
-          "parameters": {
-            "expected_option": "Option 1"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Terms and Conditions Checkbox",
-      "type": "checkbox",
-      "identifier": {
-        "method": "css_selector",
-        "value": ".checkbox-class"
-      },
-      "html_snippet": "<input type='checkbox' class='checkbox-class' />",
-      "actions": [
-        {
-          "name": "click",
-          "parameters": {}
-        },
-        {
-          "name": "validate_checked",
-          "parameters": {
-            "expected_state": true
-          }
-        }
-      ]
-    },
-    {
-      "name": "Payment Method Radio Button",
-      "type": "radio_button",
-      "identifier": {
-        "method": "xpath",
-        "value": "//input[@type='radio' and @value='radio1']"
-      },
-      "html_snippet": "<input type='radio' name='payment' value='radio1' />",
-      "actions": [
-        {
-          "name": "click",
-          "parameters": {}
-        },
-        {
-          "name": "validate_selected",
-          "parameters": {
-            "expected_value": "radio1"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Submit Button",
-      "type": "button",
-      "identifier": {
-        "method": "id",
-        "value": "submit-button"
-      },
-      "html_snippet": "<button id='submit-button'>Submit</button>",
-      "actions": [
-        {
-          "name": "click",
-          "parameters": {}
-        },
-        {
-          "name": "validate_navigation",
-          "parameters": {
-            "expected_url": "/success"
-          }
+          "scenario": "Numeric input only",
+          "preconditions": ["variations.numeric_only.exists == true"],
+          "steps": [
+            {
+              "action": "enter_text",
+              "parameters": { "value": "1234" },  # Valid numeric input
+              "expected_result": "input accepted without error"
+            },
+            {
+              "action": "enter_text",
+              "parameters": { "value": "1234a" },  # Alphanumeric input
+              "expected_result": "input rejected or triggers error message"
+            },
+            {
+              "action": "enter_text",
+              "parameters": { "value": "!@#%" },  # Special characters
+              "expected_result": "input rejected or triggers error message"
+            }
+          ]
         }
       ]
     }
