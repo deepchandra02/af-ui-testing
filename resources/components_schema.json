@@ -8,7 +8,7 @@
         "character_limit": {
           "exists": true,
           "triggered_by": "placeholder contains only X's",
-          "limit_value": "{{char_limit}}",
+          "limit_value": "_char_limit_",
           "description": "Enforces a maximum character length based on the number of X's in placeholder."
         },
         "numeric_only": {
@@ -27,17 +27,17 @@
           "steps": [
             {
               "action": "enter_text",
-              "parameters": { "value": "X" * ({{char_limit}} + 1) },
+              "parameters": { "value": "_exceed_limit_" },
               "expected_result": "input is truncated or ignored beyond character limit"
             },
             {
               "action": "enter_text",
-              "parameters": { "value": "X" * ({{char_limit}} - 1) },
+              "parameters": { "value": "_below_limit_" },
               "expected_result": "input accepted but may trigger 'input too short' validation"
             },
             {
               "action": "enter_text",
-              "parameters": { "value": "X" * {{char_limit}} },
+              "parameters": { "value": "_exact_limit_" },
               "expected_result": "input accepted without error"
             }
           ]
@@ -48,17 +48,17 @@
           "steps": [
             {
               "action": "enter_text",
-              "parameters": { "value": "1234" },  # Valid numeric input
+              "parameters": { "value": "1234" },
               "expected_result": "input accepted without error"
             },
             {
               "action": "enter_text",
-              "parameters": { "value": "1234a" },  # Alphanumeric input
+              "parameters": { "value": "1234a" },
               "expected_result": "input rejected or triggers error message"
             },
             {
               "action": "enter_text",
-              "parameters": { "value": "!@#%" },  # Special characters
+              "parameters": { "value": "!@#%" },
               "expected_result": "input rejected or triggers error message"
             }
           ]

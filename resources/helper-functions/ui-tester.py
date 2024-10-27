@@ -1,6 +1,8 @@
 import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import re
 import os
 import datetime
@@ -57,7 +59,7 @@ def test_text_inputs(driver, schema, log_file, form_link):
 
     # Find matching component in the schema based on "type"
     matching_components = [
-      component for component in schema if component["type"] == input_type]
+        component for component in schema if component["type"] == input_type]
     if not matching_components:
       continue
 
@@ -68,8 +70,8 @@ def test_text_inputs(driver, schema, log_file, form_link):
 
     # Set up dynamic variables for testing
     placeholder = input_element.get_attribute("placeholder")
-    char_limit = get_character_limit(
-      placeholder) if "character_limit" in component["variations"] else None
+    char_limit = get_character_limit(placeholder) if component["variations"].get(
+      "character_limit", {}).get("exists") else None
     aria_label = input_element.get_attribute("aria-label")
 
     # Determine if the component should have character limit and numeric only checks
@@ -98,18 +100,17 @@ def test_text_inputs(driver, schema, log_file, form_link):
 
         # Perform actions based on the step details
         if action == "enter_text":
-          text_value = parameters["value"].replace("{{char_limit}}", str(
-            char_limit)) if "{{char_limit}}" in parameters["value"] else parameters["value"]
+          text_value = parameters["value"].replace("_char_limit_", str(
+            char_limit)) if "_char_limit_" in parameters["value"] else parameters["value"]
           input_element.clear()
           input_element.send_keys(text_value)
 
           # Verify expected result based on component constraints
+          actual_value = input_element.get_attribute("value")
           if "truncated" in expected_result:
-            actual_value = input_element.get_attribute("value")
             assert len(actual_value) <= char_limit, f"Error: Text '{
                 actual_value}' exceeds character limit of {char_limit}."
           elif "input rejected" in expected_result:
-            actual_value = input_element.get_attribute("value")
             assert re.fullmatch(r"\d*", actual_value), f"Error: Non-numeric characters found in '{
                 actual_value}' for numeric-only input."
           elif "accepted without error" in expected_result:
@@ -118,7 +119,6 @@ def test_text_inputs(driver, schema, log_file, form_link):
 
           log_entry(log_file, form_link, f"Step result: {expected_result}")
 
-        # Add more actions as needed (e.g., clear, click, etc.)
       log_entry(log_file, form_link, f"Scenario '{
                 scenario_name}' completed.\n")
 
@@ -129,8 +129,26 @@ schema = load_schema(schema_path)
 
 # Set up the browser
 driver = webdriver.Chrome()  # Ensure you have the ChromeDriver set up
-url = "https://example.com"  # Replace with your URL
+
+# URL to open
+url = "https://example.com"  # Replace with the URL you want to open
 driver.get(url)
+
+# Wait until the URL is the one specified and the page is fully loaded
+try:
+  WebDriverWait(driver, 300).until(
+      # Waits until the browser URL matches the one specified
+      EC.url_to_be(url)
+  )
+  WebDriverWait(driver, 10).until(
+      EC.presence_of_all_elements_located(
+        (By.TAG_NAME, "input"))  # Ensures inputs are loaded
+  )
+  print("Page loaded successfully!")
+except Exception as e:
+  print(f"Error: {e}")
+  driver.quit()
+  exit()
 
 # Initialize log file and start testing
 log_file = initialize_log()
