@@ -20,6 +20,10 @@ def test_text_inputs(driver, schema, log_file, form_link):
 
   for input_element in input_elements:
     try:
+      aria_label = input_element.get_attribute("aria-label")
+      if not aria_label:
+        continue
+
       input_type = input_element.get_attribute("type")
 
       # Find matching component in the schema based on "type"
