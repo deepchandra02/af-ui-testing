@@ -62,6 +62,17 @@
               "expected_result": "input rejected or triggers error message"
             }
           ]
+        },
+        {
+          "scenario": "Generic input test",
+          "preconditions": [],
+          "steps": [
+            {
+              "action": "enter_text",
+              "parameters": { "value": "TestInput" },
+              "expected_result": "input accepted without error"
+            }
+          ]
         }
       ]
     }
