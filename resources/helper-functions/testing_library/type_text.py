@@ -3,139 +3,213 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from testing_library.utils import log_entry
 
+
 # Function to determine character limit from placeholder
-
-
 def get_character_limit(placeholder):
-  if placeholder and re.fullmatch(r"X+", placeholder):
-    return len(placeholder)
-  return None
+    if placeholder and re.fullmatch(r"X+", placeholder):
+        return len(placeholder)
+    return None
+
 
 # Function to test text input elements based on the schema
-
-
 def test_text_inputs(driver, schema, log_file, form_link):
-  log_entry(log_file, form_link, "Schema loaded successfully.")
-  input_elements = driver.find_elements(By.TAG_NAME, "input")
+    log_entry(log_file, form_link, "Schema loaded successfully.")
+    input_elements = driver.find_elements(By.TAG_NAME, "input")
 
-  for input_element in input_elements:
-    try:
-      aria_label = input_element.get_attribute("aria-label")
-      if not aria_label:
-        continue
+    component_count = 1
+    for input_element in input_elements:
+        try:
+            aria_label = input_element.get_attribute("aria-label")
+            if not aria_label:
+                continue
 
-      input_type = input_element.get_attribute("type")
+            input_type = input_element.get_attribute("type")
 
-      # Find matching component in the schema based on "type"
-      matching_components = [
-          component for component in schema if component["type"] == input_type]
-      if not matching_components:
-        continue
+            # Find matching component in the schema based on "type"
+            matching_components = [
+                component for component in schema if component["type"] == input_type
+            ]
+            if not matching_components:
+                continue
 
-      # Use the first matching component (assuming unique types per schema)
-      component = matching_components[0]
-      aria_label = input_element.get_attribute("aria-label") or "None"
-      log_entry(log_file, form_link, f"Component '{component['name']}' found with type '{
-                input_type}', aria-label '{aria_label}', and testing started.")
+            # Use the first matching component (assuming unique types per schema)
+            component = matching_components[0]
+            log_entry(
+                log_file,
+                form_link,
+                f"Component #{component_count}: '{component['name']}' found with type '{
+            input_type}', aria-label '{aria_label}', and testing started.",
+            )
 
-      # Set up dynamic variables for testing
-      placeholder = input_element.get_attribute("placeholder")
-      char_limit = get_character_limit(placeholder) if component["variations"].get(
-        "character_limit", {}).get("exists") else None
+            # Set up dynamic variables for testing
+            placeholder = input_element.get_attribute("placeholder")
+            char_limit = (
+                get_character_limit(placeholder)
+                if component["variations"].get("character_limit", {}).get("exists")
+                else None
+            )
 
-      # Determine if the component should have character limit and numeric only checks
-      has_char_limit = char_limit is not None and component["variations"].get(
-        "character_limit", {}).get("triggered_by") == "placeholder contains only X's"
-      is_numeric_only = aria_label == "Numeric Box" and component["variations"].get(
-        "numeric_only", {}).get("triggered_by") == "aria-label='Numeric Box'"
+            # Determine if the component should have character limit and numeric only checks
+            has_char_limit = (
+                char_limit is not None
+                and component["variations"]
+                .get("character_limit", {})
+                .get("triggered_by")
+                == "placeholder contains only X's"
+            )
+            is_numeric_only = (
+                aria_label == "Numeric Box"
+                and component["variations"].get("numeric_only", {}).get("triggered_by")
+                == "aria-label='Numeric Box'"
+            )
 
-      specific_test_run = False
+            specific_test_run = False
+            scenario_count = 1
 
-      # Dynamic combination of scenarios
-      if has_char_limit and is_numeric_only:
-        # Combined scenario: Numeric input only with character limit
-        log_entry(log_file, form_link,
-                  "Running combined scenario: 'Numeric input only with character limit'")
-        # Generate numeric input that matches the character limit
-        numeric_input = "1" * char_limit
-        input_element.clear()
-        input_element.send_keys(numeric_input)
-        actual_value = input_element.get_attribute("value")
-        assert len(actual_value) <= char_limit, f"Error: Text '{
-            actual_value}' exceeds character limit of {char_limit}."
-        assert re.fullmatch(r"\d*", actual_value), f"Error: Non-numeric characters found in '{
-            actual_value}' for numeric-only input."
-        log_entry(log_file, form_link, f"Combined scenario passed: Input '{
-                  numeric_input}' accepted within character limit.")
-        specific_test_run = True
-      else:
-        # Run individual scenarios based on preconditions
-        for scenario in component["testing_scenarios"]:
-          scenario_name = scenario["scenario"]
-          preconditions = scenario["preconditions"]
+            # Dynamic combination of scenarios
+            if has_char_limit and is_numeric_only:
+                # Combined scenario: Numeric input only with character limit
+                log_entry(
+                    log_file,
+                    form_link,
+                    f"Running combined scenario for Component #{
+              component_count}: 'Numeric input only with character limit'",
+                )
+                # Generate numeric input that matches the character limit
+                numeric_input = "1" * char_limit
+                input_element.clear()
+                input_element.send_keys(numeric_input)
+                actual_value = input_element.get_attribute("value")
+                try:
+                    assert (
+                        len(actual_value) <= char_limit
+                    ), f"FAIL - Component #{component_count}: Text '{actual_value}' exceeds character limit of {char_limit}."
+                    assert re.fullmatch(
+                        r"\d*", actual_value
+                    ), f"FAIL - Component #{component_count}: Non-numeric characters found in '{actual_value}' for numeric-only input."
+                    log_entry(
+                        log_file,
+                        form_link,
+                        f"PASS - Combined scenario for Component #{component_count}: Input '{
+                numeric_input}' accepted within character limit.",
+                    )
+                except AssertionError as e:
+                    log_entry(log_file, form_link, f"FAIL - {str(e)}")
+                specific_test_run = True
+            else:
+                # Run individual scenarios based on preconditions
+                for scenario in component["testing_scenarios"]:
+                    scenario_name = scenario["scenario"]
+                    preconditions = scenario["preconditions"]
 
-          # Evaluate preconditions dynamically
-          if "variations.character_limit.exists == true" in preconditions and not has_char_limit:
-            continue
-          if "variations.numeric_only.exists == true" in preconditions and not is_numeric_only:
-            continue
+                    # Evaluate preconditions dynamically
+                    if (
+                        "variations.character_limit.exists == true" in preconditions
+                        and not has_char_limit
+                    ):
+                        continue
+                    if (
+                        "variations.numeric_only.exists == true" in preconditions
+                        and not is_numeric_only
+                    ):
+                        continue
 
-          log_entry(log_file, form_link,
-                    f"Running scenario: '{scenario_name}'")
+                    log_entry(
+                        log_file,
+                        form_link,
+                        f"Running scenario #{scenario_count} for Component #{
+                component_count}: '{scenario_name}'",
+                    )
 
-          for step in scenario["steps"]:
-            action = step["action"]
-            parameters = step["parameters"]
-            expected_result = step["expected_result"]
+                    for step in scenario["steps"]:
+                        action = step["action"]
+                        parameters = step["parameters"]
+                        expected_result = step["expected_result"]
 
-            # Perform actions based on the step details
-            if action == "enter_text":
-              # Adapt input based on variations
-              if is_numeric_only:
-                # Ensure only numeric values are used
-                text_value = re.sub(r'\D', '', parameters["value"])
-              else:
-                text_value = parameters["value"]
+                        # Perform actions based on the step details
+                        if action == "enter_text":
+                            # Adapt input based on variations
+                            if is_numeric_only:
+                                # Ensure only numeric values are used
+                                text_value = re.sub(r"\D", "", parameters["value"])
+                            else:
+                                text_value = parameters["value"]
 
-              if "_char_limit_" in text_value:
-                text_value = text_value.replace(
-                  "_char_limit_", str(char_limit))
+                            if "_char_limit_" in text_value:
+                                text_value = text_value.replace(
+                                    "_char_limit_", str(char_limit)
+                                )
 
-              input_element.clear()
-              input_element.send_keys(text_value)
+                            input_element.clear()
+                            input_element.send_keys(text_value)
 
-              # Verify expected result based on component constraints
-              actual_value = input_element.get_attribute("value")
-              if "truncated" in expected_result:
-                assert len(actual_value) <= char_limit, f"Error: Text '{
-                    actual_value}' exceeds character limit of {char_limit}."
-              elif "input rejected" in expected_result:
-                assert re.fullmatch(r"\d*", actual_value), f"Error: Non-numeric characters found in '{
-                    actual_value}' for numeric-only input."
-              elif "accepted without error" in expected_result:
-                log_entry(log_file, form_link, f"Input '{
-                          text_value}' accepted without issues.")
+                            # Verify expected result based on component constraints
+                            actual_value = input_element.get_attribute("value")
+                            try:
+                                if "truncated" in expected_result:
+                                    assert (
+                                        len(actual_value) <= char_limit
+                                    ), f"FAIL - Component #{component_count}, Scenario #{scenario_count}: Text '{actual_value}' exceeds character limit of {char_limit}."
+                                elif "input rejected" in expected_result:
+                                    assert re.fullmatch(
+                                        r"\d*", actual_value
+                                    ), f"FAIL - Component #{component_count}, Scenario #{scenario_count}: Non-numeric characters found in '{actual_value}' for numeric-only input."
+                                elif "accepted without error" in expected_result:
+                                    log_entry(
+                                        log_file,
+                                        form_link,
+                                        f"PASS - Component #{component_count}, Scenario #{
+                        scenario_count}: Input '{text_value}' accepted without issues.",
+                                    )
+                            except AssertionError as e:
+                                log_entry(log_file, form_link, f"FAIL - {str(e)}")
 
-              log_entry(log_file, form_link, f"Step result: {expected_result}")
+                            log_entry(
+                                log_file,
+                                form_link,
+                                f"PASS - Step result for Component #{component_count}, Scenario #{
+                    scenario_count}: {expected_result}",
+                            )
 
-          log_entry(log_file, form_link, f"Scenario '{
-                    scenario_name}' completed.\n")
-          specific_test_run = True
+                    log_entry(
+                        log_file,
+                        form_link,
+                        f"PASS - Scenario #{scenario_count} for Component #{
+                component_count}: '{scenario_name}' completed.\n",
+                    )
+                    specific_test_run = True
+                    scenario_count += 1
 
-      # Generic condition for text inputs without specific variations
-      if not specific_test_run:
-        log_entry(log_file, form_link, f"Running generic test for component '{
-                  component['name']}' with type '{input_type}'")
-        input_element.clear()
-        input_element.send_keys("TestInput")
-        actual_value = input_element.get_attribute("value")
-        if actual_value == "TestInput":
-          log_entry(log_file, form_link,
-                    f"Generic test passed: Input 'TestInput' accepted without issues.")
-        else:
-          log_entry(log_file, form_link,
-                    f"Generic test failed: Input 'TestInput' was not accepted as expected.")
-    except WebDriverException as e:
-      log_entry(log_file, form_link, f"Error interacting with component ['{
-                input_type}', '{
-                aria_label}'] : {str(e)}. Moving to next component.")
+            # Generic condition for text inputs without specific variations
+            if not specific_test_run:
+                log_entry(
+                    log_file,
+                    form_link,
+                    f"Running generic test for Component #{component_count}: '{
+              component['name']}' with type '{input_type}'",
+                )
+                input_element.clear()
+                input_element.send_keys("TestInput")
+                actual_value = input_element.get_attribute("value")
+                if actual_value == "TestInput":
+                    log_entry(
+                        log_file,
+                        form_link,
+                        f"PASS - Generic test passed for Component #{
+                component_count}: Input 'TestInput' accepted without issues.",
+                    )
+                else:
+                    log_entry(
+                        log_file,
+                        form_link,
+                        f"FAIL - Generic test failed for Component #{
+                component_count}: Input 'TestInput' was not accepted as expected.",
+                    )
+            component_count += 1
+        except WebDriverException as e:
+            log_entry(
+                log_file,
+                form_link,
+                f"ERROR - Component #{component_count}: Error interacting with component '{
+            input_type}': {str(e)}. Moving to next component.",
+            )
