@@ -1,0 +1,44 @@
+﻿DEBUG LOG OF EXTRACTED LINES
+====================================
+Line 1:
+  Raw content: 'compiler has to read a program as a string of characters and'
+  Stripped: 'compiler has to read a program as a string of characters and'
+  Blank line: NO
+  Indented line: False
+------------------------------------
+Line 2:
+  Raw content: 'translate it into some internal form, a process called parsing . Another in-'
+  Stripped: 'translate it into some internal form, a process called parsing . Another in-'
+  Blank line: NO
+  Indented line: False
+------------------------------------
+Line 3:
+  Raw content: 'stance are ﬁrst-class functions, which you will study in great depth in 15–'
+  Stripped: 'stance are ﬁrst-class functions, which you will study in great depth in 15–'
+  Blank line: NO
+  Indented line: False
+------------------------------------
+Line 4:
+  Raw content: '150, a course dedicated to functional programming. When you learn about'
+  Stripped: '150, a course dedicated to functional programming. When you learn about'
+  Blank line: NO
+  Indented line: False
+------------------------------------
+Line 5:
+  Raw content: 'computer systems in 15–213 you will see how programs are represented as'
+  Stripped: 'computer systems in 15–213 you will see how programs are represented as'
+  Blank line: NO
+  Indented line: False
+------------------------------------
+Line 6:
+  Raw content: 'machine code in binary form.'
+  Stripped: 'machine code in binary form.'
+  Blank line: NO
+  Indented line: False
+------------------------------------
+Line 7:
+  Raw content: 'In this lecture we will take a look at a virtual'
+  Stripped: 'In this lecture we will take a look at a virtual'
+  Blank line: NO
+  Indented line: False
+------------------------------------
