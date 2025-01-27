@@ -1,0 +1,199 @@
+{
+  "form": {
+    "title": "Payout UBS Vested benefits account",
+    "sections": [
+      {
+        "heading": "Personal data of pension account holder",
+        "fields": [
+          {
+            "label": "Last name",
+            "type": "textbox"
+          },
+          {
+            "label": "First name(s)",
+            "type": "textbox"
+          },
+          {
+            "label": "Street, no.",
+            "type": "textbox"
+          },
+          {
+            "label": "Postal code, city (principle place of residence)",
+            "type": "textbox"
+          },
+          {
+            "label": "Date of birth",
+            "type": "date",
+            "placeholder": "dd.mm.yyyy"
+          },
+          {
+            "label": "AHV number / Social security number",
+            "type": "textbox",
+            "placeholder": "756.xxxx.xxxx.xx"
+          },
+          {
+            "label": "Marital status",
+            "type": "textbox"
+          },
+          {
+            "label": "Phone no.",
+            "type": "textbox"
+          }
+        ]
+      },
+      {
+        "heading": "Date of payment",
+        "text": {
+          "type": "paragraphs",
+          "content": [
+            "Please note that after receipt the processing time may be up to 20 working days."
+          ]
+        },
+        "fields": [
+          {
+            "label": "Date of payment",
+            "type": "date",
+            "note": "max. three months in advance"
+          }
+        ]
+      },
+      {
+        "heading": "Required Attachments",
+        "text": {
+          "type": "bullet points",
+          "content": [
+            "If marital status is single, divorced, or widowed: Copy of civil status certificate (not older than three months)",
+            "If marital status is married or in a registered partnership: Copy of marriage certificate (or family record booklet) or partnership certificate",
+            "Copy of an official, signed identity document of the pension account holder",
+            "Copy of an official, signed identity document of the spouse/registered partner"
+          ]
+        }
+      },
+      {
+        "heading": "Reason for payout",
+        "text": {
+          "type": "paragraphs",
+          "content": [
+            "The documents submitted will not be returned. Copies are accepted. Documents in foreign languages must be submitted with a certified translation into German, French, Italian, or English.",
+            "If the retirement assets are pledged, the pledgee (e.g., the bank) must cancel the pledge. A copy of the pledge release must be submitted."
+          ]
+        },
+        "fields": [
+          {
+            "type": "checkboxes",
+            "content": [
+              "Reaching 60 years of age",
+              "Definitive emigration from Switzerland (Condition: Neither working nor living in Switzerland)",
+              "Cross-border commuter with definitive termination of employment in Switzerland",
+              "Disability with recipient of a full disability pension from AI/IV",
+              "Start of self-employment in Switzerland",
+              "Payout request due to low vested benefits assets"
+            ]
+          },
+          {
+            "label": "Country of domicile",
+            "type": "textbox"
+          }
+        ]
+      },
+      {
+        "heading": "Required documents for each reason",
+        "text": {
+          "type": "bullet points",
+          "content": [
+            "Certificate of departure for emigration",
+            "Confirmation of residency abroad",
+            "Expired cross-border commuter permit",
+            "Disability decree from AI/IV",
+            "Admission confirmation from AHV compensation fund",
+            "Latest pension certificate"
+          ]
+        }
+      },
+      {
+        "heading": "Bank Details",
+        "fields": [
+          {
+            "label": "Bank name",
+            "type": "textbox"
+          },
+          {
+            "label": "IBAN",
+            "type": "textbox"
+          },
+          {
+            "label": "Holder",
+            "type": "textbox"
+          }
+        ]
+      },
+      {
+        "heading": "Investment Details",
+        "fields": [
+          {
+            "label": "UBS custody account number",
+            "type": "textbox"
+          },
+          {
+            "type": "checkboxes",
+            "content": [
+              "Transfer UBS (CH) Vitainvest funds to custody account",
+              "Sell UBS (CH) Vitainvest funds"
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Confirmation",
+        "text": {
+          "type": "paragraphs",
+          "content": [
+            "The pension account holder confirms that the application and documentation provided are correct and complete.",
+            "Authorizes the Vested Benefits Foundation of UBS AG to make necessary inquiries.",
+            "Agrees to the terms outlined in the information sheet 'Payout UBS vested benefits account.'"
+          ]
+        },
+        "fields": [
+          {
+            "label": "Place",
+            "type": "textbox"
+          },
+          {
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "label": "Signature of pension account holder",
+            "type": "signature"
+          },
+          {
+            "label": "Signature of spouse/registered partner",
+            "type": "signature"
+          }
+        ]
+      },
+      {
+        "heading": "Tax Considerations",
+        "text": {
+          "type": "paragraphs",
+          "content": [
+            "Pursuant to Swiss federal law, payouts in excess of CHF 5,000 may be subject to taxation or disclosure.",
+            "Withholding taxes are applied if the account holder resides abroad or lacks consistent domicile information.",
+            "No withholding tax applies if taxes are proven to have already been paid before payout."
+          ]
+        }
+      },
+      {
+        "heading": "Regulatory Notes",
+        "text": {
+          "type": "paragraphs",
+          "content": [
+            "Withdrawals from pension fund buy-ins are restricted for three years after the buy-in date.",
+            "EU/EFTA residents may only withdraw the non-mandatory portion unless no social security obligations exist in the destination country.",
+            "Pension assets can be withdrawn five years before or after AVS/AHV retirement age."
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "form": {
+    "title": "Payout UBS Vested benefits account",
+    "sections": [
+      [
+        {
+          "heading": "Personal data of pension account holder1",
+          "fields": [
+            {
+              "label": "Last name",
+              "type": "textbox"
+            },
+            {
+              "label": "First name(s)",
+              "type": "textbox"
+            },
+            {
+              "label": "Street, no.",
+              "type": "textbox"
+            },
+            {
+              "label": "Postal code, city (principle place of residence)",
+              "type": "textbox"
+            },
+            {
+              "label": "Date of birth",
+              "type": "date",
+              "placeholder": "dd.mm.yyyy"
+            },
+            {
+              "label": "AHV number / Social security number",
+              "type": "textbox",
+              "placeholder": "756.xxxx.xxxx.xx"
+            },
+            {
+              "label": "Marital status",
+              "type": "textbox"
+            },
+            {
+              "label": "Phone no.",
+              "type": "textbox"
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "heading": "Date of payment",
+          "text": {
+            "type": "paragraphs",
+            "content": [
+              "Please note that after receipt the processing time may be up to 20 working days."
+            ]
+          },
+          "fields": [
+            {
+              "label": "Date of payment",
+              "type": "date",
+              "note": "max. three months in advance"
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "heading": "Must be attached in all cases:",
+          "text": {
+            "type": "bullet points",
+            "content": [
+              "if marital status is single, divorced or widowed: copy of civil status certificate (not older than three months)",
+              "if marital status is married or a registered partnership: copy of marriage certificate (or family record booklet) or partnership certificate",
+              "Copy of an official, signed identity document of the pension account holder",
+              "Copy of an official, signed identity document of the of spouse/registered partner"
+            ]
+          }
+        }
+      ],
+      [
+        {
+          "heading": "Reason for Payout (specifying the documents that must be submitted)",
+          "text": {
+            "type": "paragraphs",
+            "content": [
+              "The documents submitted will not be returned. Copies are accepted. Documents in foreign languages must be submitted with a certified translation into German, French, Italian or English.",
+              "If the retirement assets are pledged, the pledgee (e. g., the bank) must cancel the pledge (pledge release). A copy of the pledge release must be submitted."
+            ]
+          },
+          "fields": [
+            {
+              "type": "checkboxes",
+              "content": [
+                "Reaching 60 Years of Age",
+                "Definitive emigration from Switzerland\nCondition: Neither working nor living in Switzerland.\nEarliest possible payout is one month prior to departure from Switzerland."
+              ]
+            }
+          ]
+        },
+        {
+          "text": {
+            "type": "bullet points",
+            "content": [
+              "Enclose copy of official certificate of departure from communal registration office with indication of place of destination (date of deregistration not older than one year)\nor\nenclose copy of confirmation of residency abroad (issue date not older than three months)",
+              "I no longer work or live in Switzerland."
+            ]
+          },
+          "fields": [
+            {
+              "type": "checkboxes",
+              "content": ["Yes", "No (payout not possible)"]
+            }
+          ]
+        },
+        {
+          "text": {
+            "type": "bullet points",
+            "content": ["Future country of domicile:"]
+          },
+          "fields": [
+            {
+              "label": "Country of domicile",
+              "type": "dropdown"
+            }
+          ]
+        }
+      ]
+    ]
+  }
+}
