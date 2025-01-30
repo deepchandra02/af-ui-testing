@@ -21,9 +21,7 @@ def convertBlackWhite(pic):
                 ImageWriter.setColor(pic, j, i, [0, 0, 0])  # black
 
 
-def detectLineSeparator(pic, sectionStartRow):
-    global rows
-    global cols
+def detectLineSeparator(pic, sectionStartRow, rows, cols):
     # initialize variables
     sectionEndRow = rows
     expectedLineProportion = 0.7
@@ -59,12 +57,15 @@ def detectLineSeparator(pic, sectionStartRow):
     return result
 
 
-def cropSections(original_image_path, sections, output_directory):
+def cropSections(
+    original_image_path, sections, output_directory, base_filename, isTitle
+):
     """
-    Crops the original image into the given sections and saves them.
+    Crops the original image into the given sections and saves them in a single directory.
     :param original_image_path: Path to the original image.
     :param sections: List of [start_y, end_y] tuples for cropping.
     :param output_directory: Directory to save the cropped images.
+    :param base_filename: The base filename to append section names.
     """
     os.makedirs(output_directory, exist_ok=True)
 
@@ -73,43 +74,53 @@ def cropSections(original_image_path, sections, output_directory):
 
     for index, (start_y, end_y) in enumerate(sections):
         cropped_image = original_image[start_y:end_y, 0:width]
-        output_path = os.path.join(output_directory, f"section_{index + 1}.jpg")
+
+        if index == 0 and isTitle:
+            section_name = "title"
+        else:
+            section_name = f"section_{index}"
+
+        output_path = os.path.join(
+            output_directory, f"{base_filename}_{section_name}.jpg"
+        )
         cv2.imwrite(output_path, cropped_image)
         print(f"Saved: {output_path}")
 
 
-def cropSections(original_image_path, sections, output_directory):
-    """
-    Crops the original image into the given sections and saves them.
-    :param original_image_path: Path to the original image.
-    :param sections: List of [start_y, end_y] tuples for cropping.
-    :param output_directory: Directory to save the cropped images.
-    """
-    global cols
-    image = cv2.imread(original_image_path)
-    for index, (start_y, end_y) in enumerate(sections):
-        cropped_image = image[start_y:end_y, 0:cols]
-        output_path = os.path.join(output_directory, f"section_{index + 1}.jpg")
-        cv2.imwrite(output_path, cropped_image)
-        print(f"Saved: {output_path}")
+def process_form_images(input_directory):
+    output_directory = f"{input_directory}_all_sections"
+    os.makedirs(output_directory, exist_ok=True)  # Create a single output folder
+    isTitle = True
+    # Iterate over all images in the directory
+    for filename in sorted(os.listdir(input_directory)):
+        if filename.lower().endswith(
+            (".png", ".jpg", ".jpeg")
+        ):  # Ensure it's an image file
+            input_image_path = os.path.join(input_directory, filename)
+
+            # Load the image
+            image = ImageWriter.loadPicture(input_image_path)
+            convertBlackWhite(image)
+            rows = ImageWriter.getHeight(image)
+            cols = ImageWriter.getWidth(image)
+            print(f"Processing {filename} - Rows: {rows}, Cols: {cols}")
+
+            # Detect positions of sections
+            sections = detectLineSeparator(image, 0, rows, cols)
+            print(f"Detected sections: {sections}")
+
+            # Crop and save sections in a single directory
+            base_filename = os.path.splitext(filename)[
+                0
+            ]  # Extract filename without extension
+            cropSections(
+                input_image_path, sections, output_directory, base_filename, isTitle
+            )
+        isTitle = False
+
+    print(f"Segmentation complete. All results saved in {output_directory}")
 
 
-# Usage
-input_image_path = "gpt-train/page1.jpg"
-output_directory = "gpt-train/images"
-os.makedirs(output_directory, exist_ok=True)
-
-# Load the image
-image = ImageWriter.loadPicture(input_image_path)
-pictureForProcessing = image
-convertBlackWhite(pictureForProcessing)
-rows = ImageWriter.getHeight(pictureForProcessing)
-cols = ImageWriter.getWidth(pictureForProcessing)
-print(f"Rows: {rows}, Cols: {cols}")
-
-# Detect positions of sections
-sections = detectLineSeparator(pictureForProcessing, 0)
-
-print(sections)
-
-cropSections(input_image_path, sections, output_directory)
+# # Usage
+input_directory = "gpt-train/file1"
+process_form_images(input_directory)
